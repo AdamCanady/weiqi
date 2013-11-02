@@ -77,24 +77,25 @@ var _init = function(weiqi){
     },
     whose_turn: function() {
       //black goes first
-      if (this.get("last_played") == undefined || this.get("last_played") == "white") { 
+      if (this.get("last_played") == undefined || this.get("last_played") == "white") {
         return "black";
       } else {
         return "white";
       }
     },
     play: function(color, x, y) {
-      if (this.whose_turn() != color) { throw new weiqi.IllegalMoveError("It's not your turn.") }
+      // if (this.whose_turn() != color) { throw new weiqi.IllegalMoveError("It's not your turn.") }
+      // AND HERE'S WHERE THE MODS COME IN =D
 
       var move = new weiqi.Move({x: x, y: y, color: color, num: this.moves.length});
       if (this.moves.is_same_as_last_move(move)) {
-        throw new weiqi.IllegalMoveError("Forbidden by the rule of ko.") 
+        throw new weiqi.IllegalMoveError("Forbidden by the rule of ko.")
       } else {
         if (this.get_cell(x, y).play(color)) {
           this.moves.add(move);
           var cells_attr = this.get('cells');
           cells_attr[x][y].holds = color;
-          this.set({ 
+          this.set({
             cells: cells_attr,
             last_played: color,
             move_count: this.get('move_count') + 1
