@@ -21,6 +21,7 @@
           <div class="banner"> \
             <p>you are</p> \
             <h1><%= player_color %></h1> \
+            <h2 style="text-align:center;"><span id="stones" style="position:relative; top:-14px; font-size:24px;">you are stoned</span><img src="/img/pieces/<%= player_color %>1.png"></h2> \
           </div> \
           <ul class="share"> \
           </ul> \
@@ -28,7 +29,7 @@
         <div class="board board<%= width %>"> \
         </div> \
       ');
-      
+
       this.share_template = _.template('\
         <li class="<%= share_class %>"><%= message %>\
           <a href="<%= url %>"><%= url %></a>\
@@ -46,6 +47,8 @@
       } else {
         this.$el.removeClass("your-turn");
       }
+
+      $("#stones").html(this.model.get(this.player_color+"_stones") + " x ")
     },
     render: function(){
       var template_attributes = _.extend({player_color: this.player_color}, this.model.toJSON());
@@ -57,8 +60,8 @@
 
       if (this.player_color == "white") {
         opponent_link_attributes = {
-          message: 'send your oponent this url:', 
-          url: this.model.invitation_url(), 
+          message: 'send your oponent this url:',
+          url: this.model.invitation_url(),
           share_class: "black"
         };
         opponent_link_html = this.share_template(opponent_link_attributes);
@@ -69,6 +72,7 @@
       _.each(this.cells, function(cell_view) {
         $(".board", board_view.$el).append(cell_view.render());
       });
+
       return this.$el;
     }
   });

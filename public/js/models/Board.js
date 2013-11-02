@@ -85,51 +85,65 @@ var _init = function(weiqi){
         return "white";
       }
     },
-    replenish: function(self) {
+    replenish: function(self, color) {
+      console.log("OMG")
+
       //lets jank
-      if (self.get('white_stones') < 3) {
-        self.set({ white_stones: self.get('white_stones') + 1 })
-
-      console.log("replenished white" + self.get('white_stones'))
+      if (self.get('white_stones') < 3 && color == 'white') {
+        self.set({ white_stones: self.get('white_stones') + 1})
+        console.log("replenished white" + self.get('white_stones'))
+        if (self.get('white_stones') < 3)
+          setTimeout(function () { self.replenish(self,color) }, 5000)
       }
 
-      if (self.get('black_stones') < 3) {
+      if (self.get('black_stones') < 3 && color == 'black') {
         self.set({ black_stones: self.get('black_stones') + 1 })
-              console.log("replenished black" + self.get('black_stones'))
-
+        console.log("replenished black" + self.get('black_stones'))
+        if (self.get('black_stones') < 3)
+          setTimeout(function () { self.replenish(self,color) }, 5000)
       }
-
-
-      setTimeout(function () { self.replenish(self) }, 1000)
     },
     play: function(color, x, y, is_server) {
 
-      if (!is_server) { // If it's the client
-        // Modify number of playable stones
-        if (color == "white") {
-          if (this.get('white_stones') < 1) { throw new weiqi.IllegalMoveError("White out of stones.")}
-            this.set({white_stones: this.get('white_stones') - 1})
-        } else if (color == "black") {
-          if (this.get('black_stones') < 1) { throw new weiqi.IllegalMoveError("Black out of stones.")}
-            this.set({black_stones: this.get('black_stones') - 1})
+      var self = this
+      var move = new weiqi.Move({x: x, y: y, color: color, num: this.moves.length});
+
+      if (!is_server) {
+        if (color == "white" && this.get('white_stones') < 1)
+          throw new weiqi.IllegalMoveError("White out of stones.")
+
+        if (color == "black" && this.get('black_stones') < 1)
+          throw new weiqi.IllegalMoveError("Black out of stones.")
+
+        if (this.moves.is_same_as_last_move(move))
+          throw new weiqi.IllegalMoveError("Forbidden by the rule of ko.")
+
+        if (this.get_cell(x, y).play(color)) {
+
+          if (!is_server) {
+            // Modify number of playable stones
+            if (color == "white") {
+              console.log("WTF")
+              this.set({white_stones: this.get('white_stones') - 1})
+              if (this.get('white_stones') == 2)
+                setTimeout(function () { self.replenish(self, 'white') }, 5000)
+            } else if (color == "black") {
+              this.set({black_stones: this.get('black_stones') - 1})
+              if (this.get('black_stones') == 2)
+                setTimeout(function () { self.replenish(self, 'black') }, 5000)
+            }
+          }
         }
       }
 
-      var move = new weiqi.Move({x: x, y: y, color: color, num: this.moves.length});
-      if (this.moves.is_same_as_last_move(move) && !is_server) {
-        throw new weiqi.IllegalMoveError("Forbidden by the rule of ko.")
-      } else {
-        if (this.get_cell(x, y).play(color)) {
-          this.moves.add(move);
-          var cells_attr = this.get('cells');
-          cells_attr[x][y].holds = color;
-          this.set({
-            cells: cells_attr,
-            last_played: color,
-            move_count: this.get('move_count') + 1
-          });
-        }
-      }
+      this.moves.add(move);
+      var cells_attr = this.get('cells');
+      cells_attr[x][y].holds = color;
+      this.set({
+        cells: cells_attr,
+        last_played: color,
+        move_count: this.get('move_count') + 1
+      });
 
       this.remove_dead_groups(this.get_cell(x,y));
 
@@ -180,8 +194,6 @@ var _init = function(weiqi){
         this.set({ moves: [] }, { silent: true });
       }
       this.moves = new weiqi.MoveCollection(this.get('moves'), { board: this });
-
-      this.replenish(this)
     },
     blank_board: function(width) {
       var cells = [];
