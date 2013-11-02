@@ -4,7 +4,9 @@ var _init = function(weiqi){
     defaults: {
       width: 19,
       move_count:0,
-      last_played: null
+      last_played: null,
+      white_stones: 3,
+      black_stones: 3
     },
 
     get_cell: function(x, y) {
@@ -32,7 +34,7 @@ var _init = function(weiqi){
         }
       );
 
-      // If attacking group is still dead after removing any 
+      // If attacking group is still dead after removing any
       // dead stones, remove it
       if (potential_suicide && potential_suicide.is_dead()){
         potential_suicide.remove_stones();
@@ -84,8 +86,15 @@ var _init = function(weiqi){
       }
     },
     play: function(color, x, y) {
-      // if (this.whose_turn() != color) { throw new weiqi.IllegalMoveError("It's not your turn.") }
-      // AND HERE'S WHERE THE MODS COME IN =D
+
+      // Modify number of playable stones
+      if (color == "white") {
+        if (this.get('white_stones') < 1) { throw new weiqi.IllegalMoveError("White out of stones.")}
+          this.set({white_stones: this.get('white_stones') - 1})
+      } else if (color == "black") {
+        if (this.get('black_stones') < 1) { throw new weiqi.IllegalMoveError("Black out of stones.")}
+          this.set({black_stones: this.get('black_stones') - 1})
+      }
 
       var move = new weiqi.Move({x: x, y: y, color: color, num: this.moves.length});
       if (this.moves.is_same_as_last_move(move)) {
@@ -138,7 +147,7 @@ var _init = function(weiqi){
         this.set({cells: this.blank_board(this.get('width'))},
                  {silent: true});
       }
-     
+
       //Instantiate cell models from boards cell attributes
       this.cells = [];
       for(var x = 0; x < this.get('width'); x++){
@@ -174,7 +183,7 @@ var _init = function(weiqi){
   });
 
   function get_origin_from_location(location) {
-    return 
+    return
   }
 
   // Helper class for computing liberties
