@@ -85,6 +85,19 @@ var _init = function(weiqi){
         return "white";
       }
     },
+    replenish: function(self) {
+      //lets jank
+      if (self.get('white_stones') < 3) {
+        self.set({ white_stones: self.get('white_stones') + 1 })
+        console.log()
+      }
+
+      if (self.get('black_stones') < 3) {
+        self.set({ black_stones: self.get('black_stones') + 1 })
+      }
+
+      setTimeout(function () { self.replenish(self) }, 1000)
+    },
     play: function(color, x, y) {
 
       // Modify number of playable stones
@@ -161,6 +174,8 @@ var _init = function(weiqi){
         this.set({ moves: [] }, { silent: true });
       }
       this.moves = new weiqi.MoveCollection(this.get('moves'), { board: this });
+
+      this.replenish(this)
     },
     blank_board: function(width) {
       var cells = [];
@@ -226,19 +241,6 @@ var _init = function(weiqi){
       });
     },
   });
-
-  // Stone replenishment
-  function reinforce() {
-    if (weiqi.get('white_stones') < 3) {
-      weiqi.set({ white_stones: weiqi.get('white_stones') + 1 })
-    }
-
-    if (weiqi.get('black_stones') < 3) {
-      weiqi.set({ black_stones: weiqi.get('black_stones') + 1 })
-    }
-
-    setTimeout(reinforce, 1000)
-  }
 
   return weiqi
 }
