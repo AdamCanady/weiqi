@@ -70,7 +70,7 @@ module.exports = function(app){
       board = new weiqi.Board({ id: board_id });
       return board.fetch();
     }).then(function(){
-      board.play(req.body.color, req.body.x, req.body.y);
+      board.play(req.body.color, req.body.x, req.body.y, true);
       return board.save();
     }).then(function(){
       res.on('finish', function(){

@@ -89,28 +89,34 @@ var _init = function(weiqi){
       //lets jank
       if (self.get('white_stones') < 3) {
         self.set({ white_stones: self.get('white_stones') + 1 })
-        console.log()
+
+      console.log("replenished white" + self.get('white_stones'))
       }
 
       if (self.get('black_stones') < 3) {
         self.set({ black_stones: self.get('black_stones') + 1 })
+              console.log("replenished black" + self.get('black_stones'))
+
       }
+
 
       setTimeout(function () { self.replenish(self) }, 1000)
     },
-    play: function(color, x, y) {
+    play: function(color, x, y, is_server) {
 
-      // Modify number of playable stones
-      if (color == "white") {
-        if (this.get('white_stones') < 1) { throw new weiqi.IllegalMoveError("White out of stones.")}
-          this.set({white_stones: this.get('white_stones') - 1})
-      } else if (color == "black") {
-        if (this.get('black_stones') < 1) { throw new weiqi.IllegalMoveError("Black out of stones.")}
-          this.set({black_stones: this.get('black_stones') - 1})
+      if (!is_server) { // If it's the client
+        // Modify number of playable stones
+        if (color == "white") {
+          if (this.get('white_stones') < 1) { throw new weiqi.IllegalMoveError("White out of stones.")}
+            this.set({white_stones: this.get('white_stones') - 1})
+        } else if (color == "black") {
+          if (this.get('black_stones') < 1) { throw new weiqi.IllegalMoveError("Black out of stones.")}
+            this.set({black_stones: this.get('black_stones') - 1})
+        }
       }
 
       var move = new weiqi.Move({x: x, y: y, color: color, num: this.moves.length});
-      if (this.moves.is_same_as_last_move(move)) {
+      if (this.moves.is_same_as_last_move(move) && !is_server) {
         throw new weiqi.IllegalMoveError("Forbidden by the rule of ko.")
       } else {
         if (this.get_cell(x, y).play(color)) {
