@@ -227,6 +227,19 @@ var _init = function(weiqi){
     },
   });
 
+  // Stone replenishment
+  function reinforce() {
+    if (weiqi.get('white_stones') < 3) {
+      weiqi.set({ white_stones: weiqi.get('white_stones') + 1 })
+    }
+
+    if (weiqi.get('black_stones') < 3) {
+      weiqi.set({ black_stones: weiqi.get('black_stones') + 1 })
+    }
+
+    setTimeout(reinforce, 1000)
+  }
+
   return weiqi
 }
 
